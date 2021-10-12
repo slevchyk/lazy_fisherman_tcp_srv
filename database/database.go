@@ -51,7 +51,8 @@ func InitDb(db *sql.DB) {
 			name TEXT DEFAULT '',
 			current_firware TEXT DEFAULT '',
 			latest_firmware TEXT DEFAULT '' ,
-			owner_id TEXT REFERENCES app_users(id) NOT NULL);`)
+			owner_id TEXT REFERENCES app_users(id) NOT NULL,
+			serial_number TEXT DEFAULT '');`)
 	if err != nil {
 		log.Fatal(err)
 	}

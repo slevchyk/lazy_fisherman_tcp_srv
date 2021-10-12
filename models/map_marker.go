@@ -3,12 +3,11 @@ package models
 import "time"
 
 type MapMarker struct {
-	Id        string    `json:"id"`
-	AppUserId string    `json:"app_user_id"`
-	ExtId     string    `json:"ext_id"`
-	BoardId   string    `json:"board_id"`
-	WaterId   string    `json:"water_id"`
-	Type      int       `json:"type"`
+	Id        int64       `json:"id"`	
+	AppUserId int64       `json:"app_user_id"`	
+	BoardId   int64       `json:"board_id"`
+	WaterId   int64       `json:"water_id"`
+	Type      int64       `json:"type"`
 	Lat       float64   `json:"lat"`
 	Lng       float64   `json:"lng"`
 	Title     string    `json:"title"`

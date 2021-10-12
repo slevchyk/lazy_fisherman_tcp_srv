@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	_ "github.com/lib/pq"
+	"github.com/slevchyk/lazy_fisherman_tcp_srv/core"
 	"github.com/slevchyk/lazy_fisherman_tcp_srv/database"
 	"github.com/slevchyk/lazy_fisherman_tcp_srv/models"
 )
@@ -56,28 +57,33 @@ func main() {
 			}
 
 			request := string(bs[:n])
+			request = strings.TrimSuffix(request, "\n")
 
-			cmds := strings.Split(request, ";")
+			cmds := strings.Split(request, "?")
 
 			if len(cmds) > 0 {
 
 				if cmds[0] == "close" {
-					conn.Close()
 					break
 				}
 
-				if cmds[0] == "coordinates" {
-					if len(cmds) == 2 {
-						answer, err := getCoordinates(cmds[1])
-						if err != nil {
-							log.Println(err.Error())
-							continue
-						}
-						io.WriteString(conn, answer)
-						continue
-					}
+				if cmds[0] == "-c" && len(cmds) == 2 {
+
+					sa := core.GetCoordinates(db, cmds[1])
+
+					response := fmt.Sprintf("s:%v;%v\n", sa.Status, sa.Response)
+					io.WriteString(conn, response)
+					continue
 				}
 
+				if cmds[0] == "-rb" && len(cmds) == 2 {
+
+					sa := core.GetCoordinates(db, cmds[1])
+
+					response := fmt.Sprintf("s:%v;%v\n", sa.Status, sa.Response)
+					io.WriteString(conn, response)
+					continue
+				}
 			}
 
 			answer := request + "-x\n"
@@ -104,28 +110,4 @@ func loadConfiguration(file string) (models.Config, error) {
 	}
 
 	return config, nil
-}
-
-func getCoordinates(boardId string) (string, error) {
-
-	var answer string
-
-	rows, err := database.SelectMapMarkerByBoardId(db, boardId)
-	if err != nil {
-		return "", err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var mm models.MapMarker
-
-		database.ScanMapMarker(rows, &mm)
-		answer += fmt.Sprintf("%f", mm.Lng)
-		answer += ":"
-		answer += fmt.Sprintf("%f", mm.Lat)
-		answer += ";\n"
-
-	}
-
-	return answer, nil
 }
